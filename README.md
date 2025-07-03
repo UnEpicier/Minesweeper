@@ -79,7 +79,7 @@ Minesweeper is a game where the player has to clear a minefield without detonati
     docker run --name minesweeper -dp 3000:3000 minesweeper
     ```
 
-# 👩‍❤️‍👨 Credits
+# 👷‍♂️ Credits
 
--   [KeunotorCagoule](https://www.github.com/KeunotorCagoule)
 -   [UnEpicier](https://www.github.com/UnEpicier)
+-   [KeunotorCagoule](https://www.github.com/KeunotorCagoule)

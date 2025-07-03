@@ -2,22 +2,33 @@
 //!                                                       Imports
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------ React --------------------------------------------------------
+// -------------------------------------------------- Hooks & Utils ----------------------------------------------------
 import { MouseEvent, useCallback, useState } from 'react';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------ Types --------------------------------------------------------
-import { SetterOrUpdater } from 'recoil';
-import { Difficulty, GridType } from '../../../types/game';
-import { GameState } from '../../../types/gameState';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------ Utils --------------------------------------------------------
+import { GridType } from '../../../types/game';
 import { discoverAroundCell, revealAllGrid } from '../../../utils/gameInteractions';
-import { startGame } from '../../../utils/generation';
+import { genGrid, startGame } from '../../../utils/generation';
+import { useGameStateStore } from '@/store/gameState';
+import { useShallow } from 'zustand/react/shallow';
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStateAction<GridType>>, gameState: GameState, setGameState: SetterOrUpdater<GameState>) => {
+export const useActions = () => {
+	const { gridSize, endType, status, difficulty, bombs, placedFlags, setStatus, setBombs, setEndType, setPlacedFlags } = useGameStateStore(
+		useShallow((state) => ({
+			gridSize: state.gridSize,
+			endType: state.endType,
+			status: state.status,
+			difficulty: state.difficulty,
+			bombs: state.bombs,
+			placedFlags: state.placedFlags,
+
+			setStatus: state.setStatus,
+			setBombs: state.setBombs,
+			setEndType: state.setEndType,
+			setPlacedFlags: state.setPlacedFlags,
+		})),
+	);
+	const [grid, setGrid] = useState(genGrid(gridSize));
+
 	const [, updateGrid] = useState({});
 	const forceUpdate = useCallback(() => updateGrid({}), []);
 
@@ -30,25 +41,19 @@ export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStat
 				let bombsCount: number | null = null;
 
 				// Start the game with making sure the clicked cell will be empty after generation
-				if (gameState.status === 'idle') {
-					const { grid: newGrid, bombsCount: _bombsCount } = startGame(gameState.gridSize, gameState.difficulty as Difficulty, true, rowIndex, colIndex);
+				if (status === 'idle') {
+					const { grid: newGrid, bombsCount: _bombsCount } = startGame(gridSize, difficulty, true, rowIndex, colIndex);
 					prev = newGrid;
 
 					bombsCount = _bombsCount;
 
-					setGameState((prevGameState) => ({
-						...prevGameState,
-						status: 'playing',
-						bombs: _bombsCount,
-					}));
+					setStatus('playing');
+					setBombs(_bombsCount);
 				}
 
 				// If the clicked cell hide a bomb, loose immediatly
 				if (prev[rowIndex][colIndex].value === 'bomb') {
-					setGameState((prevGameState) => ({
-						...prevGameState,
-						endType: 'loose',
-					}));
+					setEndType('loose');
 					return revealAllGrid(grid, true);
 				}
 				// Discover surronding cells if the clicked is empty
@@ -58,11 +63,8 @@ export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStat
 					prev[rowIndex][colIndex].hidden = false;
 				}
 
-				if (hasWin(prev, bombsCount || gameState.bombs, gameState.placedFlags)) {
-					setGameState((prevGameState) => ({
-						...prevGameState,
-						endType: 'win',
-					}));
+				if (hasWin(prev, bombsCount || bombs, placedFlags)) {
+					setEndType('win');
 					return revealAllGrid(prev, true);
 				}
 
@@ -83,27 +85,21 @@ export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStat
 				let bombsCount: number | null = null;
 
 				// Start the game without making sure the clicked cell will be empty after generation
-				if (gameState.status === 'idle') {
-					const { grid: newGrid, bombsCount: _bombsCount } = startGame(gameState.gridSize, gameState.difficulty as Difficulty, false);
+				if (status === 'idle') {
+					const { grid: newGrid, bombsCount: _bombsCount } = startGame(gridSize, difficulty, false);
 					prev = newGrid;
 
 					bombsCount = _bombsCount;
 
-					setGameState((prevGameState) => ({
-						...prevGameState,
-						status: 'playing',
-						bombs: _bombsCount,
-					}));
+					setStatus('playing');
+					setBombs(_bombsCount);
 				}
 
 				prev = prev.map((row, idx) => {
 					if (idx === rowIndex) {
 						return row.map((col, idy) => {
 							if (idy === colIndex) {
-								setGameState((prevGameState) => ({
-									...prevGameState,
-									placedFlags: col.flag ? prevGameState.placedFlags - 1 : prevGameState.placedFlags + 1,
-								}));
+								setPlacedFlags(col.flag ? placedFlags - 1 : placedFlags + 1);
 
 								return {
 									...col,
@@ -116,11 +112,8 @@ export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStat
 					return row;
 				});
 
-				if (hasWin(prev, bombsCount || gameState.bombs, gameState.placedFlags)) {
-					setGameState((prev) => ({
-						...prev,
-						endType: 'win',
-					}));
+				if (hasWin(prev, bombsCount || bombs, placedFlags)) {
+					setEndType('win');
 					return revealAllGrid(grid, true);
 				}
 
@@ -129,9 +122,17 @@ export const useActions = (grid: GridType, setGrid: React.Dispatch<React.SetStat
 		}
 	};
 
+	const openLeaderboard = useCallback(() => {
+		setStatus('board');
+	}, [setStatus]);
+
 	return {
+		grid,
+		gridSize,
+		endType,
 		handleLeftClick,
 		handleRightClick,
+		openLeaderboard,
 	};
 };
 

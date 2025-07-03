@@ -2,44 +2,38 @@
 	"name": "demineur",
 	"version": "1.0.0",
 	"description": "Démineur en ReactJS & TypeScript",
-	"author": "KeunotorCagoulé",
+	"author": "UnEpicier",
 	"private": true,
 	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"start": "serve -s -l 8000 dist",
 		"docker:build": "docker rmi minesweeper && docker build -t minesweeper ."
 	},
-	"dependencies": {
-		"@types/node": "^20.11.16",
-		"@types/react": "^18.2.53",
-		"@types/react-dom": "^18.2.18",
-		"localforage": "^1.10.0",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"react-scripts": "5.0.1",
-		"recoil": "^0.7.7",
-		"sass": "^1.70.0",
-		"typescript": "^4.9.5"
-	},
 	"devDependencies": {
-		"@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+		"@eslint/js": "^9.30.1",
+		"@types/node": "^24.0.10",
+		"@types/react": "^19.1.8",
+		"@types/react-dom": "^19.1.6",
+		"@vitejs/plugin-react": "^4.6.0",
+		"dotenv": "^17.0.1",
+		"eslint": "^9.30.1",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"globals": "^16.3.0",
+		"jiti": "^2.4.2",
+		"localforage": "^1.10.0",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"sass": "^1.89.2",
+		"typescript": "^5.8.3",
+		"vite": "^7.0.0",
+		"vite-plugin-eslint": "^1.8.1",
+		"vite-plugin-pwa": "^1.0.1",
+		"zustand": "^5.0.6"
 	},
-	"eslintConfig": {
-		"extends": [
-			"react-app",
-			"react-app/jest"
-		]
-	},
-	"browserslist": {
-		"production": [
-			">0.2%",
-			"not dead",
-			"not op_mini all"
-		],
-		"development": [
-			"last 1 chrome version",
-			"last 1 firefox version",
-			"last 1 safari version"
-		]
+	"dependencies": {
+		"serve": "^14.2.4"
 	}
 }

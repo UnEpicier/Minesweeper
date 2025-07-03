@@ -2,40 +2,42 @@
 //!                                                       Imports
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------ React --------------------------------------------------------
+// -------------------------------------------------- Hooks & Utils ----------------------------------------------------
 import { useEffect, useState } from 'react';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------- Context -------------------------------------------------------
-import { useRecoilState } from 'recoil';
-import { gameStateAtom } from '../../../contexts/gameState';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// -------------------------------------------------- Utils & Types ----------------------------------------------------
-import { Difficulty } from '../../../types/game';
+import { useShallow } from 'zustand/react/shallow';
+import { useGameStateStore } from '@/store/gameState';
 import { saveToLocalStorage } from '../../../utils/generics';
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------- Assets --------------------------------------------------------
+// ------------------------------------------------- Assets & Styles ---------------------------------------------------
 import Clock from '../../../assets/clock';
 import '../styles.scss';
 // ---------------------------------------------------------------------------------------------------------------------
 
 const Timer = () => {
-	const [gameState, setGameState] = useRecoilState(gameStateAtom);
+	const { status, endType, difficulty, gridSize, setGameTime } = useGameStateStore(
+		useShallow((state) => ({
+			status: state.status,
+			endType: state.endType,
+			difficulty: state.difficulty,
+			gridSize: state.gridSize,
+
+			setGameTime: state.setGameTime,
+		})),
+	);
 
 	const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
 	const [startedTime, setStartedTime] = useState<number | null>(null);
 	const [displayedTime, setDisplayedTime] = useState<string>('00:00');
 
 	useEffect(() => {
-		if (gameState.status === 'win' || gameState.status === 'loose') {
+		if (endType === 'win' || endType === 'loose') {
 			setStartedTime(null);
 		}
-	}, [gameState.status]);
+	}, [status]);
 
 	useEffect(() => {
-		if (!startedTime && gameState.endType === '' && gameState.status === 'playing') {
+		if (!startedTime && endType === '' && status === 'playing') {
 			const now = Date.now();
 			setStartedTime(now);
 
@@ -53,25 +55,22 @@ const Timer = () => {
 
 			setIntervalId(interval);
 		}
-	}, [startedTime, gameState.endType, gameState.status]);
+	}, [startedTime, endType, status]);
 
 	useEffect(() => {
-		if (intervalId && gameState.endType !== '') {
-			setGameState((prev) => ({
-				...prev,
-				gameTime: displayedTime,
-			}));
+		if (intervalId && endType !== '') {
+			setGameTime(displayedTime);
 
 			clearInterval(intervalId);
 
-			if (gameState.endType === 'win') {
-				saveToLocalStorage(displayedTime, gameState.difficulty as Difficulty, gameState.gridSize);
+			if (endType === 'win') {
+				saveToLocalStorage(displayedTime, difficulty, gridSize);
 			}
 		}
-	}, [intervalId, gameState.endType, gameState.difficulty, gameState.gridSize, setGameState, displayedTime]);
+	}, [intervalId, endType, difficulty, gridSize, displayedTime, setGameTime]);
 
 	return (
-		<div className='statContainer'>
+		<div className='stat-container'>
 			<Clock />
 			<p>{displayedTime}</p>
 		</div>

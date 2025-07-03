@@ -1,16 +1,26 @@
-# Developement
-.git
-.prettierrc
-.gitignore
-README.md
-
 # Node
 node_modules
 npm-debug.log
 
-# Build
-build
-
 # Docker
 Dockerfile
 .dockerignore
+
+# Git
+.git
+.github
+.gitignore
+
+# Builds
+dist
+
+# Dev configs
+.prettierrc
+.prettierignore
+jsconfig.json
+
+# Markdown files
+*.md
+
+# Release scripts
+release

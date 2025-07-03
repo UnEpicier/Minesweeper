@@ -2,18 +2,15 @@
 //!                                                       Imports
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------ React --------------------------------------------------------
-import { useEffect, useRef } from 'react';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------- Context & Stockage --------------------------------------------------
+// -------------------------------------------------- Hooks & Utils ----------------------------------------------------
+import { useCallback, useRef } from 'react';
 import localforage from 'localforage';
-import { useRecoilState } from 'recoil';
-import { gameStateAtom } from '../../contexts/gameState';
-import { langAtom } from '../../contexts/langState';
+import { useShallow } from 'zustand/react/shallow';
+import { useGameStateStore } from '../../store/gameState';
+import { useLangStore } from '../../store/langState';
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------- Styles --------------------------------------------------------
+// ------------------------------------------------- Assets & Styles ---------------------------------------------------
 import Size from '../../assets/size';
 import Difficulty from '../../assets/difficulty';
 import './styles.scss';
@@ -27,43 +24,46 @@ const store = localforage.createInstance({
 	description: 'Store 10 best game time',
 });
 
-const Home = () => {
+export default function Home() {
 	const difficultyRef = useRef<HTMLSelectElement>(null);
 	const sizeRef = useRef<HTMLSelectElement>(null);
 
-	const [, setGameState] = useRecoilState(gameStateAtom);
-	const [lang] = useRecoilState(langAtom);
+	const { setDifficulty, setGridSize, setStatus } = useGameStateStore(
+		useShallow((state) => ({
+			setDifficulty: state.setDifficulty,
+			setGridSize: state.setGridSize,
+			setStatus: state.setStatus,
+		})),
+	);
 
-	const onClick = () => {
+	const config = useLangStore((state) => state.config);
+
+	const onClick = useCallback(() => {
 		if (difficultyRef.current !== null && sizeRef.current !== null) {
 			const difficulty = difficultyRef.current.value;
 			const size = sizeRef.current.value;
 
-			const initIDB = async () => {
+			(async () => {
 				if ((await store.getItem(`${difficulty}:${size}`)) === null) {
 					await store.setItem(`${difficulty}:${size}`, []);
 				}
-			};
-			initIDB();
+			})();
 
-			setGameState((prev) => ({
-				...prev,
-				difficulty: difficulty,
-				gridSize: parseInt(size),
-				status: 'idle',
-			}));
+			setGridSize(parseInt(size) as 12 | 16 | 20);
+			setDifficulty(difficulty as 'beginner' | 'intermediate' | 'expert');
+			setStatus('idle');
 		}
-	};
+	}, []);
 
 	return (
 		<div className='gameContainer'>
-			<h1 className='title'>{lang.config.appTitle}</h1>
+			<h1 className='title'>{config.appTitle}</h1>
 
 			<div className='settingsContainer'>
 				<div className='selectorBox'>
 					<p className='settingLabel'>
 						<Size />
-						{lang.config.settings.size.label}
+						{config.settings.size.label}
 					</p>
 					<select
 						ref={sizeRef}
@@ -71,16 +71,16 @@ const Home = () => {
 						className='select'
 						defaultValue={'12'}
 					>
-						<option value='12'>{lang.config.settings.size.values.small}</option>
-						<option value='16'>{lang.config.settings.size.values.medium}</option>
-						<option value='20'>{lang.config.settings.size.values.large}</option>
+						<option value='12'>{config.settings.size.values.small}</option>
+						<option value='16'>{config.settings.size.values.medium}</option>
+						<option value='20'>{config.settings.size.values.large}</option>
 					</select>
 				</div>
 
 				<div className='selectorBox'>
 					<p className='settingLabel'>
 						<Difficulty />
-						{lang.config.settings.difficulty.label}
+						{config.settings.difficulty.label}
 					</p>
 					<select
 						ref={difficultyRef}
@@ -88,9 +88,9 @@ const Home = () => {
 						className='select'
 						defaultValue={'beginner'}
 					>
-						<option value='beginner'>{lang.config.settings.difficulty.values.beginner}</option>
-						<option value='intermediate'>{lang.config.settings.difficulty.values.intermediate}</option>
-						<option value='expert'>{lang.config.settings.difficulty.values.expert}</option>
+						<option value='beginner'>{config.settings.difficulty.values.beginner}</option>
+						<option value='intermediate'>{config.settings.difficulty.values.intermediate}</option>
+						<option value='expert'>{config.settings.difficulty.values.expert}</option>
 					</select>
 				</div>
 
@@ -98,11 +98,9 @@ const Home = () => {
 					className='startButton'
 					onClick={onClick}
 				>
-					{lang.config.start}
+					{config.start}
 				</button>
 			</div>
 		</div>
 	);
-};
-
-export default Home;
+}

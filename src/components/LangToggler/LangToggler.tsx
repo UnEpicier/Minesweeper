@@ -1,33 +1,34 @@
-import { useRecoilState } from 'recoil';
-import { langAtom } from '../../contexts/langState';
+// ---------------------------------------------------------------------------------------------------------------------
+//!                                                      Imports
+// ---------------------------------------------------------------------------------------------------------------------
 
+// -------------------------------------------------- Hooks & Utils ----------------------------------------------------
+import { useLangStore } from '../../store/langState';
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------- Assets & Styles ---------------------------------------------------
 import fr from '../../assets/fr.png';
 import en from '../../assets/en.png';
 import './styles.scss';
+// ---------------------------------------------------------------------------------------------------------------------
 
 const LangToggler = () => {
-	const [lang, setLang] = useRecoilState(langAtom);
+	const { key, setKey } = useLangStore();
 
 	return (
 		<button
-			className='langToggler'
+			className='lang-goggler'
 			onClick={() => {
-				if (lang.key === 'fr') {
+				if (key === 'fr') {
 					localStorage.setItem('lang', 'en');
-					setLang((prev) => ({
-						...prev,
-						key: 'en',
-					}));
+					setKey('eb');
 				} else {
 					localStorage.setItem('lang', 'fr');
-					setLang((prev) => ({
-						...prev,
-						key: 'fr',
-					}));
+					setKey('fr');
 				}
 			}}
 		>
-			{lang.key == 'fr' ? (
+			{key == 'fr' ? (
 				<img
 					src={fr}
 					alt='fr flag'

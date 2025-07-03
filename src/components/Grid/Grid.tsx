@@ -2,43 +2,26 @@
 //!                                                       Imports
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------ React --------------------------------------------------------
-import { useState } from 'react';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------- Context -------------------------------------------------------
-import { useRecoilState } from 'recoil';
-import { gameStateAtom } from '../../contexts/gameState';
-import { langAtom } from '../../contexts/langState';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------ Hooks --------------------------------------------------------
+// -------------------------------------------------- Hooks & Utils ----------------------------------------------------
+import { useLangStore } from '@/store/langState';
 import { useActions } from './hooks/useActions';
-// ---------------------------------------------------------------------------------------------------------------------
-
-// ------------------------------------------------------ Utils --------------------------------------------------------
-import { genGrid } from '../../utils/generation';
 import { getCellDisplayContent } from '../../utils/gameInteractions';
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------- Assets --------------------------------------------------------
+// ------------------------------------------------- Assets & Styles ---------------------------------------------------
 import Podium from '../../assets/podium';
 import './styles.scss';
 // ---------------------------------------------------------------------------------------------------------------------
 
 const Grid = () => {
-	const [gameState, setGameState] = useRecoilState(gameStateAtom);
-	const [grid, setGrid] = useState(genGrid(gameState.gridSize));
-
-	const [lang] = useRecoilState(langAtom);
-
-	const { handleLeftClick, handleRightClick } = useActions(grid, setGrid, gameState, setGameState);
+	const config = useLangStore((state) => state.config);
+	const { grid, gridSize, endType, handleLeftClick, handleRightClick, openLeaderboard } = useActions();
 
 	return (
 		<div
 			className='grid'
 			style={{
-				gridTemplateRows: `repeat(${gameState.gridSize}, var(--size))`,
+				gridTemplateRows: `repeat(${gridSize}, var(--size))`,
 			}}
 		>
 			{grid.map((row, rowIndex) => (
@@ -46,7 +29,7 @@ const Grid = () => {
 					key={`row${rowIndex}`}
 					className='row'
 					style={{
-						gridTemplateColumns: `repeat(${gameState.gridSize}, var(--size))`,
+						gridTemplateColumns: `repeat(${gridSize}, var(--size))`,
 					}}
 				>
 					{row.map((cell, cellIndex) => {
@@ -63,19 +46,19 @@ const Grid = () => {
 					})}
 				</div>
 			))}
-			{gameState.endType !== '' && (
+			{endType !== '' && (
 				<div
 					className='overlay'
 					style={
 						{
-							'--overlayColor': gameState.endType === 'win' ? '#5f8e59' : '#ca5940',
+							'--overlayColor': endType === 'win' ? '#5f8e59' : '#ca5940',
 						} as React.CSSProperties
 					}
 				>
-					<p className='overlayTitle'>{gameState.endType === 'win' ? lang.config.win : lang.config.loose}</p>
+					<p className='overlayTitle'>{endType === 'win' ? config.win : config.loose}</p>
 					<button
 						className='overlayButton'
-						onClick={() => setGameState((prev) => ({ ...prev, status: 'board' }))}
+						onClick={openLeaderboard}
 					>
 						<Podium />
 						Leaderboard

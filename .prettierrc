@@ -1,12 +1,23 @@
 {
-	"useTabs": true,
-	"tabWidth": 4,
 	"arrowParens": "always",
+	"bracketSpacing": true,
+	"bracketSameLine": false,
 	"endOfLine": "lf",
 	"jsxSingleQuote": true,
+	"overrides": [
+		{
+			"files": "*.scss",
+			"options": {
+				"singleQuote": false
+			}
+		}
+	],
+	"printWidth": 500,
+	"proseWrap": "always",
+	"useTabs": true,
 	"semi": true,
-	"trailingComma": "all",
 	"singleAttributePerLine": true,
 	"singleQuote": true,
-	"printWidth": 500
+	"tabWidth": 4,
+	"trailingComma": "all"
 }

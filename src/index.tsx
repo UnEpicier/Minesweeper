@@ -1,15 +1,22 @@
+// ---------------------------------------------------------------------------------------------------------------------
+//!                                                      Imports
+// ---------------------------------------------------------------------------------------------------------------------
+
+// --------------------------------------------------- Components ------------------------------------------------------
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import App from './app/App';
+// ---------------------------------------------------------------------------------------------------------------------
+
 import './index.scss';
-import App from './App';
-import { RecoilRoot } from 'recoil';
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const appElement = document.getElementById('root');
+if (!appElement) throw Error('No app root element found');
 
-root.render(
+const reactRoot = createRoot(appElement);
+
+reactRoot.render(
 	<React.StrictMode>
-		<RecoilRoot>
-			<App />
-		</RecoilRoot>
+		<App />
 	</React.StrictMode>,
 );

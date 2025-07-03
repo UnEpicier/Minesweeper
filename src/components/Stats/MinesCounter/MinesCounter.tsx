@@ -2,21 +2,26 @@
 //!                                                       Imports
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------- Recoil --------------------------------------------------------
-import { useRecoilState } from 'recoil';
-import { gameStateAtom } from '../../../contexts/gameState';
+// -------------------------------------------------- Hooks & Utls -----------------------------------------------------
+import { useShallow } from 'zustand/react/shallow';
+import { useGameStateStore } from '../../../store/gameState';
 // ---------------------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------- Assets --------------------------------------------------------
+// ------------------------------------------------- Assets & Styles ---------------------------------------------------
 import Flag from '../../../assets/flag';
 import '../styles.scss';
 // ---------------------------------------------------------------------------------------------------------------------
 
 const MinesCounter = () => {
-	const [{ bombs, placedFlags }] = useRecoilState(gameStateAtom);
+	const { bombs, placedFlags } = useGameStateStore(
+		useShallow((state) => ({
+			bombs: state.bombs,
+			placedFlags: state.placedFlags,
+		})),
+	);
 
 	return (
-		<div className='statContainer'>
+		<div className='stat-container'>
 			<Flag />
 			<p>
 				{placedFlags} / {bombs}

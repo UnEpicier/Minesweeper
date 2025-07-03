@@ -1,23 +1,30 @@
 # Build stage 
-FROM node:lts-alpine as build
+FROM node:lts-alpine AS base
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+
+# Production dependencies
+FROM base AS prod-deps
+RUN npm ci --omit=dev
+
+# Build
+FROM base AS build
 
 COPY . .
 
+RUN npm ci
 RUN npm run build
 
 # Final stage
-FROM node:lts-alpine as final
+FROM node:lts-alpine AS final
+
+WORKDIR /app
+
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /app/dist
+
 EXPOSE 3000
 
-WORKDIR /usr/src/app
-
-COPY --from=build /usr/src/app/build .
-
-RUN npm i -g serve
-
-CMD serve
+CMD ["npm", "start"]
